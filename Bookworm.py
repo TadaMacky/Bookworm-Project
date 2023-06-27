@@ -250,7 +250,19 @@ class userWindow:
         self.button_logout = ctk.CTkButton(self.frame_logoutbuttoncontainer, width=110, height=33, fg_color=thirdary_color, corner_radius=11, text="LOGOUT", font=buttonfont, hover_color=button_hover, command=self.logout_button)
         self.button_logout.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        #
+        # left side widgets > search author
+        self.search_authorcontainer = tk.Frame(self.frame_bottomcontainer, width=150, height=78, bg=main_color)
+        self.search_authorcontainer.pack_propagate(False)
+        self.search_authorcontainer.pack(side="right", padx=(5, 20))
+        self.button_searchauthor = ctk.CTkButton(self.search_authorcontainer, width=150, height=33, fg_color=thirdary_color, corner_radius=11, text="SEARCH AUTHOR", font=buttonfont, hover_color=button_hover, command=self.search_author)
+        self.button_searchauthor.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+        # left side widgets > search author
+        self.search_titlecontainer = tk.Frame(self.frame_bottomcontainer, width=150, height=78, bg=main_color)
+        self.search_titlecontainer.pack_propagate(False)
+        self.search_titlecontainer.pack(side="right", padx=(5, 5))
+        self.button_searchtitle = ctk.CTkButton(self.search_titlecontainer, width=150, height=33, fg_color=thirdary_color, corner_radius=11, text="SEARCH TITLE", font=buttonfont, hover_color=button_hover, command=self.search_title)
+        self.button_searchtitle.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
         # right side widgets > book display
         self.frame_bookdisplay = ctk.CTkScrollableFrame(self.frame_rightmain, width=599, height=618, fg_color=thirdary_color)
@@ -307,7 +319,7 @@ class userWindow:
                 self.button_play.pack(side="left", padx=(5, 0))
 
                 self.image_add = ctk.CTkImage(light_image=Image.open("resources/plusfile.png"),dark_image=Image.open("resources/plusfile.png"), size=(22, 22))
-                self.button_add = ctk.CTkButton(self.buttoncontainer, image=self.image_add, width=0, height=0,fg_color="transparent", text="", hover_color='#AF87E9', command=lambda: self.push_to_database(book_info[0]))
+                self.button_add = ctk.CTkButton(self.buttoncontainer, image=self.image_add, width=0, height=0,fg_color="transparent", text="", hover_color='#AF87E9')
                 self.button_add.pack(side="left", padx=(5, 0))
         else:
             print("No matching books found.")
@@ -377,12 +389,6 @@ class userWindow:
         cleaned_text = " ".join(unique_words)
         return cleaned_text
 
-    def push_to_database(self, book):
-        usernametopush = self.theusername
-        booktopush = book
-
-        print(usernametopush + " " + booktopush)
-
     def display_borrowed(self):
         conn = sqlite3.connect('database/Bookworm.db')
         cursor = conn.cursor()
@@ -410,6 +416,91 @@ class userWindow:
         self.userwindow.destroy()
         inwindow = loginWindow()
         inwindow.login.mainloop()
+
+    def search_author(self):
+        authordialog = ctk.CTkInputDialog(text="Type in a Author:", title="Test")
+
+        conn = sqlite3.connect('database\Bookworm.db')
+        cursor = conn.cursor()
+
+        author_entry = authordialog.get_input()
+
+        query = f"SELECT * FROM bookTable WHERE bookAuthor LIKE '%{author_entry}%'"
+
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        for row in results:
+            for child in self.frame_bookdisplay.winfo_children():
+                child.destroy()
+            
+            self.AuthorResult = ctk.CTkFrame(self.frame_bookdisplay, height=60, width=580, fg_color='#282c34', corner_radius=11)
+            self.AuthorResult.pack_propagate(False)
+            self.AuthorResult.pack(padx=10, pady=(5, 5))
+
+            self.titlecons = ctk.CTkFrame(self.AuthorResult, width=490, height=60, fg_color='#282c34')
+            self.titlecons.pack_propagate(False)
+            self.titlecons.pack(side="left")
+
+            self.TitleLab = tk.Label(self.titlecons, text=" " + row[1] + " by " + row[0], bg='#282c34', fg='#DBDBDB', font=("Arial", 15))
+            self.TitleLab.pack(side="left", padx=(10, 0))
+
+            self.buttoncons = ctk.CTkFrame(self.AuthorResult, width=90, height=60, fg_color='#282c34')
+            self.buttoncons.pack_propagate(False)
+            self.buttoncons.pack(side="left")
+
+            self.imagplay = ctk.CTkImage(light_image=Image.open("resources/play-circle.png"),dark_image=Image.open("resources/play-circle.png"), size=(20, 20))
+            self.buttonplay = ctk.CTkButton(self.buttoncons, image=self.imagplay, width=0, height=0,fg_color="transparent", text="", hover_color='#AF87E9')
+            self.buttonplay.pack(side="left", padx=(5, 0))
+
+            self.imageadd = ctk.CTkImage(light_image=Image.open("resources/plusfile.png"),dark_image=Image.open("resources/plusfile.png"), size=(22, 22))
+            self.buttonadd = ctk.CTkButton(self.buttoncons, image=self.imageadd, width=0, height=0,fg_color="transparent", text="", hover_color='#AF87E9')
+            self.buttonadd.pack(side="left", padx=(5, 0))
+
+        conn.close()
+
+    def search_title(self):
+        titledialog = ctk.CTkInputDialog(text="Type in a Author:", title="Test")
+
+        conn = sqlite3.connect('database\Bookworm.db')
+        cursor = conn.cursor()
+
+        title_entry = titledialog.get_input()
+
+        query = f"SELECT * FROM bookTable WHERE bookTitle LIKE '%{title_entry}%'"
+
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        for row in results:
+            for child in self.frame_bookdisplay.winfo_children():
+                child.destroy()
+            
+            self.TitleResult = ctk.CTkFrame(self.frame_bookdisplay, height=60, width=580, fg_color='#282c34', corner_radius=11)
+            self.TitleResult.pack_propagate(False)
+            self.TitleResult.pack(padx=10, pady=(5, 5))
+
+            self.titleconss = ctk.CTkFrame(self.TitleResult, width=490, height=60, fg_color='#282c34')
+            self.titleconss.pack_propagate(False)
+            self.titleconss.pack(side="left")
+
+            self.titlab = tk.Label(self.titleconss, text=" " + row[1] + " by " + row[0], bg='#282c34', fg='#DBDBDB', font=("Arial", 15))
+            self.titlab.pack(side="left", padx=(10, 0))
+
+            self.butcons = ctk.CTkFrame(self.TitleResult, width=90, height=60, fg_color='#282c34')
+            self.butcons.pack_propagate(False)
+            self.butcons.pack(side="left")
+
+            self.implay = ctk.CTkImage(light_image=Image.open("resources/play-circle.png"),dark_image=Image.open("resources/play-circle.png"), size=(20, 20))
+            self.buttplay = ctk.CTkButton(self.butcons, image=self.implay, width=0, height=0,fg_color="transparent", text="", hover_color='#AF87E9')
+            self.buttplay.pack(side="left", padx=(5, 0))
+
+            self.imadd = ctk.CTkImage(light_image=Image.open("resources/plusfile.png"),dark_image=Image.open("resources/plusfile.png"), size=(22, 22))
+            self.buttadd = ctk.CTkButton(self.butcons, image=self.imadd, width=0, height=0,fg_color="transparent", text="", hover_color='#AF87E9')
+            self.buttadd.pack(side="left", padx=(5, 0))
+
+        conn.close()
+
 # =================================================================================================================================
 # Login Window
 # =================================================================================================================================
