@@ -6,6 +6,7 @@ import os
 import json
 import sqlite3
 import tkinter as tk
+import re
 import sys
 import PyPDF2
 import customtkinter as ctk
@@ -242,12 +243,14 @@ class userWindow:
         self.button_refresh = ctk.CTkButton(self.frame_refreshbuttoncontainer, width=110, height=33, fg_color=thirdary_color, corner_radius=11, text="REFRESH", font=buttonfont, hover_color=button_hover, command=self.convert_pdf_to_json)
         self.button_refresh.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        # left side widgets > Profile Button
-        self.frame_profilebuttoncontainer = tk.Frame(self.frame_bottomcontainer, width=110, height=78, bg=main_color)
-        self.frame_profilebuttoncontainer.pack_propagate(False)
-        self.frame_profilebuttoncontainer.pack(side="left", padx=(5, 5))
-        self.button_profile = ctk.CTkButton(self.frame_profilebuttoncontainer, width=110, height=33, fg_color=thirdary_color, corner_radius=11, text="PROFILE", font=buttonfont, hover_color=button_hover)
-        self.button_profile.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        # left side widgets > logout Button
+        self.frame_logoutbuttoncontainer = tk.Frame(self.frame_bottomcontainer, width=110, height=78, bg=main_color)
+        self.frame_logoutbuttoncontainer.pack_propagate(False)
+        self.frame_logoutbuttoncontainer.pack(side="left", padx=(5, 5))
+        self.button_logout = ctk.CTkButton(self.frame_logoutbuttoncontainer, width=110, height=33, fg_color=thirdary_color, corner_radius=11, text="LOGOUT", font=buttonfont, hover_color=button_hover, command=self.logout_button)
+        self.button_logout.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+        #
 
         # right side widgets > book display
         self.frame_bookdisplay = ctk.CTkScrollableFrame(self.frame_rightmain, width=599, height=618, fg_color=thirdary_color)
@@ -329,9 +332,21 @@ class userWindow:
                 for word in words_to_remove:
                     text = text.replace(word, "")
 
+                # Remove Numbers and Symbols
+                text = self.remove_numbers_and_symbols(text)
+
+                # Create sorted word list
+                word_list = text.split()
+                sorted_words = sorted(word_list)
+
                 # Create the output JSON file path and save the file
                 output_path = os.path.join("Books/JSONBooks", os.path.splitext(filename)[0] + ".json")
                 self.save_as_json(text, output_path)
+
+    def remove_numbers_and_symbols(self, text):
+        # Remove numbers and symbols using regular expressions
+        cleaned_text = re.sub(r'[^a-zA-Z\s]', '', text)
+        return cleaned_text
 
     def extract_text_from_pdf(self, file_path):
             with open(file_path, "rb") as pdf_file:
@@ -348,7 +363,7 @@ class userWindow:
     def save_as_json(self, text, output_path):
             # Create a dictionary with the text content
             data = {
-                "text": text
+                "sorted_words": text
             }
 
             # Save the data as JSON
@@ -391,6 +406,10 @@ class userWindow:
             self.borrowedtitle = tk.Label(self.titlecon, text=" " + rows[0], bg='#282c34', fg='#DBDBDB', font=("Arial", 15))
             self.borrowedtitle.pack(side="left", padx=(10, 0))
 
+    def logout_button(self):
+        self.userwindow.destroy()
+        inwindow = loginWindow()
+        inwindow.login.mainloop()
 # =================================================================================================================================
 # Login Window
 # =================================================================================================================================
